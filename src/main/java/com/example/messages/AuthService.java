@@ -14,6 +14,6 @@ public class AuthService {
 
 		public boolean check(Message msg, User u) {
 				this.log.info("checking " + msg.getText() + " for access to user " + u.getId() + " by authenticated user " + u.getId() + ".");
-				return (u.getId().equals(msg.getTo().getId()));
+				return u.getId().equals(msg.getTo().getId());
 		}
 }

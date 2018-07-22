@@ -8,10 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 
@@ -37,6 +34,10 @@ public class User {
 				this.email = u;
 				this.password = pw;
 				authorities.forEach(this.authorities::add);
+		}
+
+		User(String u, String pw, Authority... auths) {
+				this(u, pw, new HashSet<>(Arrays.asList(auths)));
 		}
 
 		User(String e, String pw) {
