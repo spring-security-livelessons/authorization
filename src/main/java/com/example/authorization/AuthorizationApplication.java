@@ -2,9 +2,12 @@ package com.example.authorization;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,6 +42,24 @@ public class AuthorizationApplication {
 		}
 }
 
+@Order(1)
+@Configuration
+@EnableWebSecurity
+class ActuatorConfiguration extends WebSecurityConfigurerAdapter {
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+				http
+					.requestMatcher(EndpointRequest.toAnyEndpoint())
+					.authorizeRequests()
+					.requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
+					.anyRequest().authenticated()
+					.and()
+					.httpBasic();
+
+		}
+}
+
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -50,7 +71,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 					.csrf().disable();
 
 				http
-					.httpBasic();
+					.formLogin().and().httpBasic();
 
 				http
 					.authorizeRequests()
