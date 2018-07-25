@@ -15,9 +15,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,24 +30,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
-	* Lesson 6: Web Based Authorization (rob | josh)
-	* 6.1 What is Authorization?
-	* 6.2 Roles and Authorities
-	* 6.3 SpEL primer
-	* 6.4 Spring Security Expressions
-	* 6.5 Encapsulating Logic into Beans
-	* 6.6 Path Parameterspath parameters
-	* 6.7 mvcMatchers
-	* 6.8 Actuator (Endpoint.*)
-	*/
+@EnableWebSecurity
 @SpringBootApplication
 public class AuthorizationApplication {
 
 		public static void main(String args[]) {
 				SpringApplication.run(AuthorizationApplication.class, args);
 		}
-
 }
 
 @RestController
@@ -59,31 +50,76 @@ class UserRestController {
 				this.userDetailsService = userDetailsService;
 		}
 
+		@GetMapping("/a")
+		String a() {
+				return "a";
+		}
+
+		@GetMapping("/b")
+		String b() {
+				return "b";
+		}
+
+		@GetMapping("/c")
+		String c() {
+				return "c";
+		}
+
+		@GetMapping("/root")
+		String root() {
+				return "root";
+		}
+
 		@GetMapping("/users/{" + NAME + "}")
 		UserDetails userByName(@PathVariable(NAME) String name) {
 				return this.userDetailsService.loadUserByUsername(name);
 		}
 }
 
+
 @Configuration
-@EnableWebSecurity
-class SecurityConfig extends WebSecurityConfigurerAdapter {
+class CommonSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		@Override
 		public void configure(WebSecurity web) throws Exception {
-				web.ignoring().mvcMatchers("/foo"); // todo DON'T DO THIS!
+//				web.ignoring().mvcMatchers("/foo"); // todo DON'T DO THIS!
 		}
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
+
+				//@formatter:off
+
 				http
 					.httpBasic();
 
-				http
-					.authorizeRequests()
-					.mvcMatchers("/users/{" + UserRestController.NAME + "}").access("#name == principal?.username ")
-					.mvcMatchers(HttpMethod.GET, "/a").access("hasRole('ADMIN')")
-					.mvcMatchers(HttpMethod.GET, "/b").access("@authz.check( request, principal )"); // Map<RequestMatcher , ConfigAttribute>
+					http
+						.authorizeRequests()
+								.requestMatchers( request -> request.getHeader("x-rob") != null).hasRole("ADMIN")
+								.mvcMatchers("/root*").authenticated()
+								.mvcMatchers(HttpMethod.GET, "/a").hasRole("ADMIN")
+								.mvcMatchers(HttpMethod.GET, "/b").access("hasAnyRole('ADMIN', 'USER')")
+								.mvcMatchers(HttpMethod.GET, "/c").access("@authz.check( request, principal )")
+								.mvcMatchers("/users/{name}").access("#name == principal?.username ")
+						;
+
+
+				//@formatter:on
+		}
+}
+
+@RestController
+@RequestMapping("/foo")
+class FooRestController {
+
+		@GetMapping("/foo/bar1")
+		String bar1() {
+				return "bar1";
+		}
+
+		@GetMapping("/foo/bar2")
+		String bar2() {
+				return "bar2";
 		}
 }
 

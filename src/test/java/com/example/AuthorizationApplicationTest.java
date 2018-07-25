@@ -20,9 +20,24 @@ public class AuthorizationApplicationTest {
 		private MockMvc mockMvc;
 
 		@Test
-		@WithUserDetails("jlong")
-		public void customAccess() throws Exception {
-				this.mockMvc.perform(MockMvcRequestBuilders.get("/users/jlong")).andExpect(MockMvcResultMatchers.status().isOk());
-				this.mockMvc.perform(MockMvcRequestBuilders.get("/users/rwinch")).andExpect(MockMvcResultMatchers.status().is4xxClientError());
+		public void root () throws Exception {
+				this.mockMvc
+					.perform(MockMvcRequestBuilders.get("/root"))
+					.andExpect(MockMvcResultMatchers.status().is4xxClientError());
+
+				this.mockMvc.perform(MockMvcRequestBuilders.get("/root/1"))
+					.andExpect(MockMvcResultMatchers.status().is4xxClientError());
 		}
+
+		@Test
+		@WithUserDetails("jlong")
+		public void authorization() throws Exception {
+
+				this.mockMvc.perform(MockMvcRequestBuilders.get("/users/jlong"))
+					.andExpect(MockMvcResultMatchers.status().isOk());
+
+				this.mockMvc.perform(MockMvcRequestBuilders.get("/users/rwinch"))
+					.andExpect(MockMvcResultMatchers.status().is4xxClientError());
+		}
+
 }
