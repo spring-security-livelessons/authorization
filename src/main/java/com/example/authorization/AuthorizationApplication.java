@@ -42,21 +42,24 @@ public class AuthorizationApplication {
 		}
 }
 
+
 @Order(1)
 @Configuration
 @EnableWebSecurity
-class ActuatorConfiguration extends WebSecurityConfigurerAdapter {
+class ActuatorSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
+
+				//@formatter:off
 				http
 					.requestMatcher(EndpointRequest.toAnyEndpoint())
-					.authorizeRequests()
-					.requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
-					.anyRequest().authenticated()
+							.authorizeRequests()
+									.requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
+									.anyRequest().authenticated()
 					.and()
 					.httpBasic();
-
+				//@formatter:off
 		}
 }
 
