@@ -32,31 +32,31 @@ import java.util.stream.Collectors;
 @SpringBootApplication
 public class AuthorizationApplication {
 
-		@Bean
-		PasswordEncoder noOpPasswordEncoder() {
-				return NoOpPasswordEncoder.getInstance();
-		}
+	@Bean
+	PasswordEncoder noOpPasswordEncoder() {
+		return NoOpPasswordEncoder.getInstance();
+	}
 
-		public static void main(String[] args) {
-				SpringApplication.run(AuthorizationApplication.class, args);
-		}
+	public static void main(String[] args) {
+		SpringApplication.run(AuthorizationApplication.class, args);
+	}
+
 }
-
 
 @Order(1)
 @Configuration
 @EnableWebSecurity
 class ActuatorSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
 
-				//@formatter:off
+		//@formatter:off
 				http
-					.requestMatcher(EndpointRequest.toAnyEndpoint())
-							.authorizeRequests()
-									.requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
-									.anyRequest().authenticated()
+						.requestMatcher(EndpointRequest.toAnyEndpoint())
+								.authorizeRequests()
+										.requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
+										.anyRequest().authenticated()
 					.and()
 					.httpBasic();
 				//@formatter:off
@@ -155,7 +155,8 @@ class CustomUser implements UserDetails {
 		private final String username, password;
 		private final boolean active;
 
-		public CustomUser(String username, String password, boolean active, String... authorities) {
+		CustomUser(String username, String password, boolean active,
+															String... authorities) {
 				this.username = username;
 				this.password = password;
 				this.active = active;
